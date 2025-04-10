@@ -21,11 +21,27 @@ enum Roles {
 }
 
 model User {
-  id String @id @default(cuid())
-  name String
-  email String @unique
-  password String
-  role  Roles @default(READER)
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Roles    @default(READER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  Post      Post[]
+
+  @@map("user")
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  title     String
+  content   String   @db.Text
+  published Boolean  @default(false)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("post")
 }
