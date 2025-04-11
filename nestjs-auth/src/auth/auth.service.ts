@@ -1,12 +1,14 @@
+import { packRules } from '@casl/ability/extra';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import bcrypt from 'bcrypt';
+import { CaslAbilityService } from 'src/casl/casl-ability/casl-ability.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LoginDto } from './dto/login-auth.dto';
-import bcrypt from 'bcrypt'
 
 @Injectable()
 export class AuthService {
-  constructor(private jwtService: JwtService, private pirsmaService: PrismaService){}
+  constructor(private jwtService: JwtService, private pirsmaService: PrismaService, private abilityService: CaslAbilityService){}
 
 
   async login(loginDto: LoginDto){
@@ -27,7 +29,8 @@ export class AuthService {
       throw new Error('Invalid Credentials')
     }
 
-    const token = this.jwtService.sign({name: user.name, email: user.email, role: user.role, sub: user.id})
+    const ability = this.abilityService.createForUser(user)
+    const token = this.jwtService.sign({name: user.name, email: user.email, role: user.role, sub: user.id, permissions: packRules(ability.rules)})
     return {
       access_token: token,
     }

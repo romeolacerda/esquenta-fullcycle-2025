@@ -1,10 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
-import { UsersService } from './users.service';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Roles } from '@prisma/client';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { RequiredRoles } from 'src/auth/required-roles.decorator';
+import { RoleGuard } from 'src/auth/role/role.guard';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { AuthGuard } from 'src/auth/auth.guard';
+import { UsersService } from './users.service';
 
-// @UseGuards(AuthGuard)
+@UseGuards(AuthGuard, RoleGuard)
+@RequiredRoles(Roles.ADMIN)
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
